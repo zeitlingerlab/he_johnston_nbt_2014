@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<title></title>
+
+<script src="html_support/jquery-1.11.0/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="html_support/bootstrap-2.3.2/css/spacelab.min.css" rel="stylesheet" />
+<link href="html_support/bootstrap-2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet" />
+<script src="html_support/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="html_support/highlight/textmate.css"
+      type="text/css" />
+<script src="html_support/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+<link rel="stylesheet" href="html_support/custom.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+<div class="container-fluid main-container">
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#figure-s1-twist-dna-shape-and-the-ta-ebox-motif">Figure S1: Twist DNA shape and the TA EBOX motif</a><ul>
+<li><a href="#orientation">Orientation</a></li>
+<li><a href="#base-composition-adjacent-to-twi-bound-ta-motifs">Base composition adjacent to Twi-bound TA motifs</a></li>
+<li><a href="#dna-shape">DNA shape</a></li>
+</ul></li>
+<li><a href="#heatmap">Heatmap</a><ul>
+<li><a href="#session-information">Session information</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="figure-s1-twist-dna-shape-and-the-ta-ebox-motif" class="section level1">
+<h1>Figure S1: Twist DNA shape and the TA EBOX motif</h1>
+<p><strong>Project:</strong> ChIP-nexus methods paper</p>
+<p><strong>Author:</strong> <a href="mailto:jjj@stowers.org">Jeff Johnston</a></p>
+<p><strong>Generated:</strong> Thu Oct 23 2014, 09:10 PM</p>
+<div id="orientation" class="section level2">
+<h2>Orientation</h2>
+<p>We will first orient the Twist CATATG motifs “towards” the side with the greater ChIP-nexus signal. As the motif is palindromic, we can simply assign a strand to the motif to give it a direction. We will define positive-strand motifs as those where the Twist signal is greatest to the right of the motif, and negative-strand motifs will be those where the Twist signal is greatest to the left.</p>
+<p>We’ll start with the top 200 <strong><code>CATATG</code></strong> motifs. After assigning a direction to each motif, we can plot a ChIP-nexus metapeak to verify that we have properly oriented the motifs toward the direction of highest Twist signal:</p>
+<p><img src="figure_s1_b_c_d_output/top_motifs_metapeak-1.png" title="" alt="" width="672" /></p>
+</div>
+<div id="base-composition-adjacent-to-twi-bound-ta-motifs" class="section level2">
+<h2>Base composition adjacent to Twi-bound TA motifs</h2>
+<p>Now that the top motifs are oriented towards greater Twist binding, we can look at the the base composition around these motifs:</p>
+<p><img src="figure_s1_b_c_d_output/base_composition_plot-1.png" title="" alt="" width="672" /></p>
+<p>Statistical tests (single base):</p>
+<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
+<!-- Thu Oct 23 21:11:11 2014 -->
+<table border="1">
+<tr>
+<th>
+position
+</th>
+<th>
+pvalue
+</th>
+<th>
+neg_log_pv
+</th>
+</tr>
+<tr>
+<td align="right">
+-16
+</td>
+<td align="right">
+0.44
+</td>
+<td align="right">
+0.36
+</td>
+</tr>
+<tr>
+<td align="right">
+-15
+</td>
+<td align="right">
+0.60
+</td>
+<td align="right">
+0.22
+</td>
+</tr>
+<tr>
+<td align="right">
+-14
+</td>
+<td align="right">
+0.64
+</td>
+<td align="right">
+0.19
+</td>
+</tr>
+<tr>
+<td align="right">
+-13
+</td>
+<td align="right">
+0.93
+</td>
+<td align="right">
+0.03
+</td>
+</tr>
+<tr>
+<td align="right">
+-12
+</td>
+<td align="right">
+0.36
+</td>
+<td align="right">
+0.45
+</td>
+</tr>
+<tr>
+<td align="right">
+-11
+</td>
+<td align="right">
+0.64
+</td>
+<td align="right">
+0.20
+</td>
+</tr>
+<tr>
+<td align="right">
+-10
+</td>
+<td align="right">
+0.90
+</td>
+<td align="right">
+0.04
+</td>
+</tr>
+<tr>
+<td align="right">
+-9
+</td>
+<td align="right">
+0.49
+</td>
+<td align="right">
+0.31
+</td>
+</tr>
+<tr>
+<td align="right">
+-8
+</td>
+<td align="right">
+0.84
+</td>
+<td align="right">
+0.08
+</td>
+</tr>
+<tr>
+<td align="right">
+-7
+</td>
+<td align="right">
+0.55
+</td>
+<td align="right">
+0.26
+</td>
+</tr>
+<tr>
+<td align="right">
+-6
+</td>
+<td align="right">
+0.99
+</td>
+<td align="right">
+0.00
+</td>
+</tr>
+<tr>
+<td align="right">
+-5
+</td>
+<td align="right">
+0.31
+</td>
+<td align="right">
+0.51
+</td>
+</tr>
+<tr>
+<td align="right">
+-4
+</td>
+<td align="right">
+0.08
+</td>
+<td align="right">
+1.11
+</td>
+</tr>
+<tr>
+<td align="right">
+-3
+</td>
+<td align="right">
+0.22
+</td>
+<td align="right">
+0.66
+</td>
+</tr>
+<tr>
+<td align="right">
+-2
+</td>
+<td align="right">
+0.68
+</td>
+<td align="right">
+0.17
+</td>
+</tr>
+<tr>
+<td align="right">
+-1
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+8.46
+</td>
+</tr>
+<tr>
+<td align="right">
+0
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+55.01
+</td>
+</tr>
+<tr>
+<td align="right">
+1
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+47.25
+</td>
+</tr>
+<tr>
+<td align="right">
+2
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+47.25
+</td>
+</tr>
+<tr>
+<td align="right">
+3
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+47.25
+</td>
+</tr>
+<tr>
+<td align="right">
+4
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+47.25
+</td>
+</tr>
+<tr>
+<td align="right">
+5
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+55.01
+</td>
+</tr>
+<tr>
+<td align="right">
+6
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+12.38
+</td>
+</tr>
+<tr>
+<td align="right">
+7
+</td>
+<td align="right">
+0.05
+</td>
+<td align="right">
+1.29
+</td>
+</tr>
+<tr>
+<td align="right">
+8
+</td>
+<td align="right">
+0.25
+</td>
+<td align="right">
+0.61
+</td>
+</tr>
+<tr>
+<td align="right">
+9
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+2.48
+</td>
+</tr>
+<tr>
+<td align="right">
+10
+</td>
+<td align="right">
+0.01
+</td>
+<td align="right">
+1.98
+</td>
+</tr>
+<tr>
+<td align="right">
+11
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+4.10
+</td>
+</tr>
+<tr>
+<td align="right">
+12
+</td>
+<td align="right">
+0.01
+</td>
+<td align="right">
+2.06
+</td>
+</tr>
+<tr>
+<td align="right">
+13
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+3.00
+</td>
+</tr>
+<tr>
+<td align="right">
+14
+</td>
+<td align="right">
+0.17
+</td>
+<td align="right">
+0.77
+</td>
+</tr>
+<tr>
+<td align="right">
+15
+</td>
+<td align="right">
+0.20
+</td>
+<td align="right">
+0.71
+</td>
+</tr>
+<tr>
+<td align="right">
+16
+</td>
+<td align="right">
+0.04
+</td>
+<td align="right">
+1.36
+</td>
+</tr>
+<tr>
+<td align="right">
+17
+</td>
+<td align="right">
+0.04
+</td>
+<td align="right">
+1.41
+</td>
+</tr>
+<tr>
+<td align="right">
+18
+</td>
+<td align="right">
+0.73
+</td>
+<td align="right">
+0.14
+</td>
+</tr>
+<tr>
+<td align="right">
+19
+</td>
+<td align="right">
+0.03
+</td>
+<td align="right">
+1.58
+</td>
+</tr>
+<tr>
+<td align="right">
+20
+</td>
+<td align="right">
+0.74
+</td>
+<td align="right">
+0.13
+</td>
+</tr>
+<tr>
+<td align="right">
+21
+</td>
+<td align="right">
+0.18
+</td>
+<td align="right">
+0.75
+</td>
+</tr>
+</table>
+<p><img src="figure_s1_b_c_d_output/base_composition_stat_test_plot-1.png" title="" alt="" width="672" /></p>
+<p>Statistical tests (sliding 5bp window):</p>
+<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
+<!-- Thu Oct 23 21:11:11 2014 -->
+<table border="1">
+<tr>
+<th>
+center
+</th>
+<th>
+pvalue
+</th>
+<th>
+neg_log_pv
+</th>
+</tr>
+<tr>
+<td align="right">
+-14
+</td>
+<td align="right">
+0.06
+</td>
+<td align="right">
+1.21
+</td>
+</tr>
+<tr>
+<td align="right">
+-13
+</td>
+<td align="right">
+0.08
+</td>
+<td align="right">
+1.12
+</td>
+</tr>
+<tr>
+<td align="right">
+-12
+</td>
+<td align="right">
+0.27
+</td>
+<td align="right">
+0.56
+</td>
+</tr>
+<tr>
+<td align="right">
+-11
+</td>
+<td align="right">
+0.60
+</td>
+<td align="right">
+0.22
+</td>
+</tr>
+<tr>
+<td align="right">
+-10
+</td>
+<td align="right">
+0.68
+</td>
+<td align="right">
+0.17
+</td>
+</tr>
+<tr>
+<td align="right">
+-9
+</td>
+<td align="right">
+0.75
+</td>
+<td align="right">
+0.13
+</td>
+</tr>
+<tr>
+<td align="right">
+-8
+</td>
+<td align="right">
+0.68
+</td>
+<td align="right">
+0.17
+</td>
+</tr>
+<tr>
+<td align="right">
+-7
+</td>
+<td align="right">
+0.90
+</td>
+<td align="right">
+0.05
+</td>
+</tr>
+<tr>
+<td align="right">
+-6
+</td>
+<td align="right">
+0.32
+</td>
+<td align="right">
+0.50
+</td>
+</tr>
+<tr>
+<td align="right">
+-5
+</td>
+<td align="right">
+0.05
+</td>
+<td align="right">
+1.26
+</td>
+</tr>
+<tr>
+<td align="right">
+-4
+</td>
+<td align="right">
+0.05
+</td>
+<td align="right">
+1.31
+</td>
+</tr>
+<tr>
+<td align="right">
+-3
+</td>
+<td align="right">
+0.01
+</td>
+<td align="right">
+2.13
+</td>
+</tr>
+<tr>
+<td align="right">
+-2
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+21.60
+</td>
+</tr>
+<tr>
+<td align="right">
+-1
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+26.91
+</td>
+</tr>
+<tr>
+<td align="right">
+0
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+13.99
+</td>
+</tr>
+<tr>
+<td align="right">
+1
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+38.93
+</td>
+</tr>
+<tr>
+<td align="right">
+2
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+54.08
+</td>
+</tr>
+<tr>
+<td align="right">
+3
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+54.08
+</td>
+</tr>
+<tr>
+<td align="right">
+4
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+35.11
+</td>
+</tr>
+<tr>
+<td align="right">
+5
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+12.26
+</td>
+</tr>
+<tr>
+<td align="right">
+6
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+38.11
+</td>
+</tr>
+<tr>
+<td align="right">
+7
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+27.79
+</td>
+</tr>
+<tr>
+<td align="right">
+8
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+9.88
+</td>
+</tr>
+<tr>
+<td align="right">
+9
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+9.35
+</td>
+</tr>
+<tr>
+<td align="right">
+10
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+10.65
+</td>
+</tr>
+<tr>
+<td align="right">
+11
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+13.64
+</td>
+</tr>
+<tr>
+<td align="right">
+12
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+11.55
+</td>
+</tr>
+<tr>
+<td align="right">
+13
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+9.81
+</td>
+</tr>
+<tr>
+<td align="right">
+14
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+7.56
+</td>
+</tr>
+<tr>
+<td align="right">
+15
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+6.96
+</td>
+</tr>
+<tr>
+<td align="right">
+16
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+4.25
+</td>
+</tr>
+<tr>
+<td align="right">
+17
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+4.85
+</td>
+</tr>
+<tr>
+<td align="right">
+18
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+4.11
+</td>
+</tr>
+<tr>
+<td align="right">
+19
+</td>
+<td align="right">
+0.00
+</td>
+<td align="right">
+3.79
+</td>
+</tr>
+</table>
+<p><img src="figure_s1_b_c_d_output/base_composition_stat_test_sliding_plot-1.png" title="" alt="" width="672" /></p>
+</div>
+<div id="dna-shape" class="section level2">
+<h2>DNA shape</h2>
+<p>A previous study found that DNA shape can influence the binding specificity of bHLH transcription factors (Gordân, Shen, Dror, Zhou, Horton, Rohs, and Bulyk, 2013). It is possible that Max, like other bHLH transcription factors, is sensitive to DNA shape characteristics and the differences in base composition seen above are a reflection of this sensitivity.</p>
+<p>To investigate this possibility, we first need to obtain genome-wide DNA shape information. A recent paper from Zhou, Yang, Lu, Dror, Machado, Ghane, Felice, and Rohs (2013) provides a web service called <a href="http://rohslab.cmb.usc.edu/DNAshape/">DNAShape</a> that calculates DNA shape parameters given an input sequence. Genome-wide data for <em>Drosophila melanogaster</em> was constructed by obtaining DNA minor groove width and propeller twist values for all possible 5-mers and then mapping those values to the genome sequence.</p>
+<p>Using this data, we can examine these two DNA shape parameters around the Max binding motifs:</p>
+<p><img src="figure_s1_b_c_d_output/dna_shape_plot-1.png" title="" alt="" width="576" /><img src="figure_s1_b_c_d_output/dna_shape_plot-2.png" title="" alt="" width="576" /></p>
+<p>The maximum propeller twist value is found 6 bp downstream of the motif right edge. We can use a paired t-test to compare these values with the corresponding values 6 bp upstream of the motif’s left edge:</p>
+<p>This test yields a p-value of 3.345816310^{-8}.</p>
+</div>
+</div>
+<div id="heatmap" class="section level1">
+<h1>Heatmap</h1>
+<p>The sharp increase in the DNA “propeller twist” on the side of the motif with higher Twist binding is quite pronounced. We can visualize this association with a heatmap by ordering the (directionless) motifs by the difference in propeller twist between the left and right sides:</p>
+<p><img src="figure_s1_b_c_d_output/dna_shape_heatmap_plot-1.png" title="" alt="" width="864" /><img src="figure_s1_b_c_d_output/dna_shape_heatmap_plot-2.png" title="" alt="" width="864" /><img src="figure_s1_b_c_d_output/dna_shape_heatmap_plot-3.png" title="" alt="" width="864" /><img src="figure_s1_b_c_d_output/dna_shape_heatmap_plot-4.png" title="" alt="" width="864" /></p>
+<p>The ChIP-nexus heatmap shows that when the propeller twist difference is most extreme (at the top and bottom of the heatmap), Max appears to prefer the side with higher (less negative) propeller twist.</p>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<p>For reproducibility, this analysis was performed with the following R/Bioconductor session:</p>
+<pre><code>R version 3.1.1 (2014-07-10)
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+ [1] grid      stats4    parallel  stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
+
+other attached packages:
+ [1] reshape2_1.4                          digest_0.6.4                         
+ [3] yaml_2.1.13                           lattice_0.20-29                      
+ [5] knitcitations_1.0-1                   seqLogo_1.32.0                       
+ [7] plyr_1.8.1                            ggplot2_1.0.0                        
+ [9] BSgenome.Dmelanogaster.UCSC.dm3_1.4.0 BSgenome_1.34.0                      
+[11] rtracklayer_1.26.1                    Biostrings_2.34.0                    
+[13] XVector_0.6.0                         GenomicRanges_1.18.1                 
+[15] GenomeInfoDb_1.2.0                    IRanges_2.0.0                        
+[17] S4Vectors_0.4.0                       BiocGenerics_0.12.0                  
+[19] xtable_1.7-4                         
+
+loaded via a namespace (and not attached):
+ [1] base64enc_0.1-2         BatchJobs_1.4           BBmisc_1.7             
+ [4] bibtex_0.3-6            BiocParallel_1.0.0      bitops_1.0-6           
+ [7] brew_1.0-6              checkmate_1.5.0         codetools_0.2-9        
+[10] colorspace_1.2-4        DBI_0.3.1               evaluate_0.5.5         
+[13] fail_1.2                foreach_1.4.2           formatR_1.0            
+[16] GenomicAlignments_1.2.0 gtable_0.1.2            htmltools_0.2.6        
+[19] httr_0.5                iterators_1.0.7         knitr_1.7              
+[22] labeling_0.3            lubridate_1.3.3         MASS_7.3-35            
+[25] memoise_0.2.1           munsell_0.4.2           proto_0.3-10           
+[28] Rcpp_0.11.3             RCurl_1.95-4.3          RefManageR_0.8.34      
+[31] RJSONIO_1.3-0           rmarkdown_0.3.3         Rsamtools_1.18.0       
+[34] RSQLite_0.11.4          scales_0.2.4            sendmailR_1.2-1        
+[37] stringr_0.6.2           tools_3.1.1             XML_3.98-1.1           
+[40] zlibbioc_1.12.0        </code></pre>
+</div>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+
+</body>
+</html>
