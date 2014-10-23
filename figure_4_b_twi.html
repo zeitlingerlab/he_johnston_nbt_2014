@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<title></title>
+
+<script src="html_support/jquery-1.11.0/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link href="html_support/bootstrap-2.3.2/css/spacelab.min.css" rel="stylesheet" />
+<link href="html_support/bootstrap-2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet" />
+<script src="html_support/bootstrap-2.3.2/js/bootstrap.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="html_support/highlight/textmate.css"
+      type="text/css" />
+<script src="html_support/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+<link rel="stylesheet" href="html_support/custom.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+<div class="container-fluid main-container">
+
+
+
+<div id="TOC">
+<ul>
+<li><a href="#figure-4b-twist-chip-nexus">Figure 4B: Twist ChIP-nexus</a><ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#motif">Motif</a></li>
+<li><a href="#average-profile-top-200">Average profile (top 200)</a></li>
+<li><a href="#heatmap">Heatmap</a></li>
+<li><a href="#session-information">Session information</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="figure-4b-twist-chip-nexus" class="section level1">
+<h1>Figure 4B: Twist ChIP-nexus</h1>
+<p><strong>Project:</strong> ChIP-nexus methods paper</p>
+<p><strong>Author:</strong> <a href="mailto:jjj@stowers.org">Jeff Johnston</a></p>
+<p><strong>Generated:</strong> Thu Oct 23 2014, 08:38 PM</p>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>We will compare the profiles of the following samples around the top 200 Twist <code>CABATG</code> motifs:</p>
+<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
+<!-- Thu Oct 23 20:38:08 2014 -->
+<table border="1">
+<tr>
+<th>
+sample
+</th>
+<th>
+antibody
+</th>
+<th>
+species
+</th>
+<th>
+digestion
+</th>
+</tr>
+<tr>
+<td>
+dmel_embryo_twi_chipnexus_01
+</td>
+<td>
+twi
+</td>
+<td>
+dmel
+</td>
+<td>
+lambda
+</td>
+</tr>
+</table>
+</div>
+<div id="motif" class="section level2">
+<h2>Motif</h2>
+<p>E-BOX motif: <code>CABATG</code></p>
+<p>Window size centered at motif: 51 bp</p>
+</div>
+<div id="average-profile-top-200" class="section level2">
+<h2>Average profile (top 200)</h2>
+<p><img src="figure_4_b_twi_output/plots_per_sample-1.png" title="" alt="" width="900" /></p>
+<p><img src="figure_4_b_twi_output/zoomed_plot-1.png" title="" alt="" width="900" /></p>
+</div>
+<div id="heatmap" class="section level2">
+<h2>Heatmap</h2>
+<p><img src="figure_4_b_twi_output/plot_heatmaps-1.png" title="" alt="" width="600" /><img src="figure_4_b_twi_output/plot_heatmaps-2.png" title="" alt="" width="600" /><img src="figure_4_b_twi_output/plot_heatmaps-3.png" title="" alt="" width="600" /></p>
+</div>
+<div id="session-information" class="section level2">
+<h2>Session information</h2>
+<p>For reproducibility, this analysis was performed with the following R/Bioconductor session:</p>
+<pre><code>R version 3.1.1 (2014-07-10)
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+ [1] grid      stats4    parallel  stats     graphics  grDevices utils    
+ [8] datasets  methods   base     
+
+other attached packages:
+ [1] lattice_0.20-29                       reshape2_1.4                         
+ [3] digest_0.6.4                          yaml_2.1.13                          
+ [5] BSgenome.Dmelanogaster.UCSC.dm3_1.4.0 BSgenome_1.34.0                      
+ [7] rtracklayer_1.26.1                    Biostrings_2.34.0                    
+ [9] XVector_0.6.0                         GenomicRanges_1.18.1                 
+[11] GenomeInfoDb_1.2.0                    IRanges_2.0.0                        
+[13] S4Vectors_0.4.0                       BiocGenerics_0.12.0                  
+[15] plyr_1.8.1                            ggplot2_1.0.0                        
+[17] xtable_1.7-4                         
+
+loaded via a namespace (and not attached):
+ [1] base64enc_0.1-2         BatchJobs_1.4           BBmisc_1.7             
+ [4] BiocParallel_1.0.0      bitops_1.0-6            brew_1.0-6             
+ [7] checkmate_1.5.0         codetools_0.2-9         colorspace_1.2-4       
+[10] DBI_0.3.1               evaluate_0.5.5          fail_1.2               
+[13] foreach_1.4.2           formatR_1.0             GenomicAlignments_1.2.0
+[16] gtable_0.1.2            htmltools_0.2.6         iterators_1.0.7        
+[19] knitr_1.7               labeling_0.3            MASS_7.3-35            
+[22] munsell_0.4.2           proto_0.3-10            Rcpp_0.11.3            
+[25] RCurl_1.95-4.3          rmarkdown_0.3.3         Rsamtools_1.18.0       
+[28] RSQLite_0.11.4          scales_0.2.4            sendmailR_1.2-1        
+[31] stringr_0.6.2           tools_3.1.1             XML_3.98-1.1           
+[34] zlibbioc_1.12.0        </code></pre>
+</div>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+
+</body>
+</html>
