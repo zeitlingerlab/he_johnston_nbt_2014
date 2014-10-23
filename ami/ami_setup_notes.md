@@ -67,7 +67,7 @@ Install R and Bioconductor packages by sourcing the following script from a root
 update.packages(ask=F)
 install.packages(c("gtools", "reshape", "ggplot2", "xtable", 
                    "data.table", "matrixStats", "stringr", "optparse", "xts",
-                   "dplyr", "knitr", "knitcitations"))
+                   "dplyr", "knitr", "knitcitations", "rmarkdown"))
 
 source("http://bioconductor.org/biocLite.R")
 biocLite()
