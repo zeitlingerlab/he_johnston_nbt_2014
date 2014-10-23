@@ -3,7 +3,7 @@ library(parallel)
 library(yaml)
 
 output_path <- "samples/"
-original_rdata_path <- file.path(yaml.load_file("_output.yml")$data$base_path, "rdata")
+original_rdata_path <- file.path(yaml.load_file("_output.yaml")$data$base_path, "rdata")
 
 samples.df <- read.csv("samples/samples.csv", stringsAsFactors=FALSE, header=TRUE)
 
