@@ -1,0 +1,6 @@
+table tr:nth-child(odd),table th:nth-child(odd),table td:nth-child(odd) {
+  background: rgba(255,255,255,0.06)
+}
+table tr:nth-child(even),table td:nth-child(even) {
+  background: rgba(0,0,0,0.06)
+}

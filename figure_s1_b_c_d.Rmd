@@ -1,0 +1,356 @@
+``` {r setup, echo=FALSE, message=FALSE, include=FALSE, error=FALSE}
+library(xtable)
+library(BSgenome.Dmelanogaster.UCSC.dm3)
+library(GenomicRanges)
+library(rtracklayer)
+library(ggplot2)
+library(plyr)
+library(seqLogo)
+library(knitcitations)
+library(lattice)
+
+# Output folder for this document
+options(knitr.figure_dir = "figure_s1_b_c_d_output")
+
+source("shared_code/knitr_common.r")
+source("shared_code/exo_metapeak.r")
+source("shared_code/granges_common.r")
+source("shared_code/samples.r")
+source("shared_code/ggplot_theme.r")
+```
+
+# Figure S1: Twist DNA shape and the TA EBOX motif
+
+``` {r header_child, child="child_docs/header_child.Rmd"}
+```
+
+## Orientation
+
+We will first orient the Twist CATATG motifs "towards" the side with the greater ChIP-nexus signal. As the motif is palindromic, we can simply assign a strand to the motif to give it a direction. We will define positive-strand motifs as those where the Twist signal is greatest to the right of the motif, and negative-strand motifs will be those where the Twist signal is greatest to the left.
+
+We'll start with the top 200 **`CATATG`** motifs. After assigning a direction to each motif, we can plot a ChIP-nexus metapeak to verify that we have properly oriented the motifs toward the direction of highest Twist signal:
+
+``` {r orient_twi_motifs, include=FALSE}
+
+twi_sample <- get_sample_cl("dmel_embryo_twi_chipnexus_01")
+
+twi_ta.gr <- cache("twi_ta.gr.rds", function() {
+  twi_ta.gr <- filter_chrs(vmatchPattern("CATATG", Dmelanogaster, max.mismatch=0, fixed=TRUE))
+  twi_ta.gr <- twi_ta.gr[strand(twi_ta.gr) == "+"]
+  twi_ta.gr[width(resize(twi_ta.gr, width=100, fix="center")) == 100]
+})
+
+all.gr <- cache("all.gr.rds", function() {
+  
+  left_pos_region  <- resize(shift(twi_ta.gr, -8), width=13, fix="center")
+  right_pos_region <- resize(shift(twi_ta.gr,  9), width=13, fix="center")
+  
+  left_neg_region  <- resize(shift(twi_ta.gr, -3), width=13, fix="center")
+  right_neg_region <- resize(shift(twi_ta.gr, 16), width=13, fix="center")
+
+  mcols(twi_ta.gr)$left_signal  <- regionSums(left_pos_region,  twi_sample$pos) + regionSums(left_neg_region, twi_sample$neg)
+  mcols(twi_ta.gr)$right_signal <- regionSums(right_pos_region, twi_sample$pos) + regionSums(right_neg_region, twi_sample$neg)
+
+  strand(twi_ta.gr) <- with(mcols(twi_ta.gr), ifelse(left_signal > right_signal, "-", "+"))
+  twi_ta.gr
+})
+
+top.gr <- all.gr[order(mcols(all.gr)$left_signal + mcols(all.gr)$right_signal, decreasing=TRUE)][1:200]
+
+```
+
+``` {r top_motifs_metapeak, message=FALSE, fig.cap="", fig.width=7, fig.height=4}
+
+top.reads <- cache("top.reads.rds", function() {
+  exo_metapeak(top.gr, twi_sample, upstream=40, downstream=45, sample_name="Max", smooth=3)
+})
+
+motif.box <- data.frame(xmin=0, 
+                        xmax=5,
+                        ymin=-Inf,
+                        ymax=Inf)
+
+g <- ggplot(top.reads, aes(x=tss_distance, y=reads, color=strand)) +
+     geom_line(size=1.1) +
+     geom_hline(yintercept=0, color="black") +
+     scale_colour_manual(name="Strand", values=c("+"="red", "-"="darkblue")) +
+     geom_rect(show_guide=FALSE, inherit.aes=FALSE, data=motif.box,
+               aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), 
+               alpha=0.25, fill="gray50") +
+     labs(x="Distance to motif edge", 
+          y="Average ChIP-nexus Reads",
+          title="Twist ChIP-nexus\nTop 200 TA motifs oriented toward highest Twist signal") +
+     scale_y_continuous(limits=c(0, max(top.reads$reads)),
+                        expand=c(0, 0)) +
+     scale_x_continuous(labels=c(-40, -20, 0, 0, 20, 40),
+                        breaks=c(-40, -20, 0, 5, 25, 45), limits=c(-40, 45)) +
+     theme_manuscript(12)
+g
+```
+
+## Base composition adjacent to Twi-bound TA motifs
+
+Now that the top motifs are oriented towards greater Twist binding, we can look at the the base composition around these motifs:
+
+``` {r base_composition_data, include=FALSE}
+top.bases <- cache("top.bases.rds", function() {
+  base_frequencies(top.gr, upstream=16, downstream=16+6)
+})
+```
+
+``` {r base_composition_plot, fig.cap="", fig.width=7, fig.height=4}
+g.bases <- ggplot(top.bases, aes(x=tss_distance, y=frequency, color=base)) +
+           geom_line() +
+           scale_colour_manual("Base", values=c("G"="#FDA429", "A"="#009933", "T"="#FC291C", "C"="#103FFB")) +
+           labs(x="Distance to motif edge", 
+                y="Base frequency",
+                title="Base frequency around motif") +
+           scale_x_continuous(labels=c(-15, -10, -5, 0, 0, 5, 10, 15), 
+                              breaks=c(-15, -10, -5, 0, 5, 10, 15, 20)) +
+           scale_y_continuous(expand=c(0, 0)) +
+           theme_manuscript(12)
+
+g.bases
+```
+
+Statistical tests (single base):
+
+``` {r base_composition_stat_tests, results="asis"}
+
+top.bases$count <- top.bases$frequency * 200
+
+chisq_test_at_base_position <- function(position, bases.df, background_gc=0.43) {
+  a.count <- subset(bases.df, tss_distance == position & base == "A")$count
+  t.count <- subset(bases.df, tss_distance == position & base == "T")$count
+  g.count <- subset(bases.df, tss_distance == position & base == "G")$count
+  c.count <- subset(bases.df, tss_distance == position & base == "C")$count
+  
+  a.exp <- 200 * (1 - background_gc) / 2
+  t.exp <- a.exp
+  g.exp <- 200 * background_gc / 2
+  c.exp <- g.exp
+  
+  m <- matrix(c(a.count, t.count, g.count, c.count, a.exp, t.exp, g.exp, c.exp), byrow=TRUE, nrow=2)
+  chisq.test(m)$p.value
+}
+
+bases.pv <- data.frame(position=unique(sort(top.bases$tss_distance)),
+                       pvalue=sapply(unique(sort(top.bases$tss_distance)), chisq_test_at_base_position, top.bases))
+
+
+bases.pv$neg_log_pv <- -log10(bases.pv$pvalue)
+html_table(bases.pv)
+```
+
+``` {r base_composition_stat_test_plot, fig.cap="", fig.width=7, fig.height=4}
+
+bases.pv <- subset(bases.pv, ! position %in% c(0:5))
+
+g.pv <- ggplot(bases.pv, aes(x=position, y=-log10(pvalue))) +
+           geom_bar(stat="identity") +
+           geom_hline(yintercept=-log10(0.01), color="gray50", linetype="dotted") +
+           labs(x="Distance to motif edge", 
+                y="-log10 pvalue",
+                title="Chi-squared test for base distribution") +
+           theme_bw() +
+           scale_x_continuous(labels=c(-15, -10, -5, 0, 0, 5, 10, 15), 
+                              breaks=c(-15, -10, -5, 0, 5, 10, 15, 20)) +
+           theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
+g.pv
+```
+
+Statistical tests (sliding 5bp window):
+
+``` {r base_composition_sliding_stat_tests, results="asis"}
+
+chisq_test_at_base_positions <- function(middle_pos, bases.df, flank=2, background_gc=0.43) {
+  
+  positions <- (middle_pos - flank):(middle_pos + flank)
+  
+  total_count <- 200 * length(positions)
+  
+  a.count <- sum(subset(bases.df, tss_distance %in% positions & base == "A")$count)
+  t.count <- sum(subset(bases.df, tss_distance %in% positions & base == "T")$count)
+  g.count <- sum(subset(bases.df, tss_distance %in% positions & base == "G")$count)
+  c.count <- sum(subset(bases.df, tss_distance %in% positions & base == "C")$count)
+  
+  a.exp <- total_count * (1 - background_gc) / 2
+  t.exp <- a.exp
+  g.exp <- total_count * background_gc / 2
+  c.exp <- g.exp
+  
+  m <- matrix(c(a.count, t.count, g.count, c.count, a.exp, t.exp, g.exp, c.exp), byrow=TRUE, nrow=2)
+  chisq.test(m)$p.value
+}
+
+sliding_starts <- min(top.bases$tss_distance) + 2
+sliding_stops  <- max(top.bases$tss_distance) - 2
+
+bases.pv2 <- data.frame(center=sliding_starts:sliding_stops,
+                       pvalue=sapply(sliding_starts:sliding_stops, chisq_test_at_base_positions, top.bases))
+
+bases.pv2$neg_log_pv <- -log10(bases.pv2$pvalue)
+html_table(bases.pv2)
+```
+
+``` {r base_composition_stat_test_sliding_plot, fig.cap="", fig.width=7, fig.height=4}
+
+bases.pv2 <- subset(bases.pv2, ! center %in% c(-2:7))
+
+g.pv2 <- ggplot(bases.pv2, aes(x=center, y=-log10(pvalue))) +
+           geom_bar(stat="identity") +
+           geom_hline(yintercept=-log10(0.01), color="gray50", linetype="dotted") +
+           labs(x="Distance to motif edge", 
+                y="-log10 pvalue",
+                title="Chi-squared test for base distribution (5-bp sliding windows)") +
+           theme_bw() +
+           scale_x_continuous(labels=c(-15, -10, -5, 0, 0, 5, 10, 15), 
+                              breaks=c(-15, -10, -5, 0, 5, 10, 15, 20)) +
+           theme(panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
+g.pv2
+```
+
+## DNA shape
+
+A previous study found that DNA shape can influence the binding specificity of bHLH transcription factors `r citep("10.1016/j.celrep.2013.03.014")`. It is possible that Max, like other bHLH transcription factors, is sensitive to DNA shape characteristics and the differences in base composition seen above are a reflection of this sensitivity.
+
+To investigate this possibility, we first need to obtain genome-wide DNA shape information. A recent paper from `r citet("10.1093/nar/gkt437")` provides a web service called [DNAShape](http://rohslab.cmb.usc.edu/DNAshape/) that calculates DNA shape parameters given an input sequence. Genome-wide data for *Drosophila melanogaster* was constructed by obtaining DNA minor groove width and propeller twist values for all possible 5-mers and then mapping those values to the genome sequence.
+
+Using this data, we can examine these two DNA shape parameters around the Max binding motifs:
+
+``` {r get_dna_shape_data, include=FALSE}
+
+minor_groove.cov <- data_path("dna_shape/minor_groove_width.bw")
+prop_twist.cov   <- data_path("dna_shape/propeller_twist.bw")
+
+mg.reads <- cache("mg.reads.rds", function() {
+  reads.mg <- standard_metapeak(top.gr, minor_groove.cov, upstream=25, downstream=31, sample_name="Minor Groove Width")
+})
+
+pt.reads <- cache("pt.reads.rds", function() {
+  standard_metapeak(top.gr, prop_twist.cov, upstream=25, downstream=31, sample_name="Propeller Twist")
+})
+
+pt_oriented.matrix <- cache("pt_oriented.matrix.rds", function() {
+  standard_metapeak_matrix(top.gr, prop_twist.cov, upstream=25, downstream=31)
+})
+
+top_oriented.gr <- top.gr
+strand(top.gr) <- "+"
+
+pt.matrix <- cache("pt.matrix.rds", function() {
+  standard_metapeak_matrix(top.gr, prop_twist.cov, upstream=25, downstream=31)
+})
+
+exo.matrix <- cache("exo.matrix.rds", function() {
+  exo_metapeak_matrix(top.gr, twi_sample, upstream=25, downstream=31)
+})
+
+m.both <- exo.matrix$pos + exo.matrix$neg
+m.order <- order(rowMeans(pt.matrix[, 32:37]) - rowMeans(pt.matrix[, 20:25]), decreasing=TRUE)
+
+pt.matrix <- pt.matrix[m.order, ]
+
+m.pos <- exo.matrix$pos[m.order, ]
+m.neg <- exo.matrix$neg[m.order, ]
+
+max.value <- quantile(rbind(m.pos, m.neg), 0.98)
+
+m.pos <- normalize_matrix(m.pos, max.value)
+m.neg <- normalize_matrix(m.neg, max.value)
+
+pos.colors <- paste0(colorRampPalette(c("white", "#D62A31"))(33), "88")
+neg.colors <- paste0(colorRampPalette(c("white", "#1E214A"))(33), "88")
+
+```
+
+``` {r dna_shape_plot, warning=FALSE, fig.cap="", fig.width=6, fig.height=4}
+shape_plot <- function(reads.df) {
+  g.shape <- ggplot(reads.df, aes(x=tss_distance, y=reads)) +
+             geom_line() +
+             geom_rect(show_guide=FALSE, inherit.aes=FALSE, data=motif.box,
+                 aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), 
+                 alpha=0.25, fill="gray50") +
+             labs(x="Distance to motif edge",
+                  y=reads.df$sample_name[1], 
+                  title=paste0("DNA shape around Twi-bound TA motifs\n", reads.df$sample_name[1])) +
+             scale_x_continuous(labels=c(-20, -15, -10, -5, 0, 0, 5, 10, 15, 20),
+                                breaks=c(-20, -15, -10, -5, 0, 5, 10, 15, 20, 25), limits=c(-20, 25)) +
+             theme_manuscript(12)
+  g.shape  
+}
+
+g.mg   <- shape_plot(mg.reads)
+g.pt   <- shape_plot(pt.reads)
+
+g.mg
+g.pt
+```
+
+
+``` {r prop_twist_t_test, include=FALSE}
+pt_max <- which.max(colSums(pt_oriented.matrix[, 28:56])) + 27 - (25 + 6)
+values_right <- pt_oriented.matrix[, pt_max + (25 + 6)]
+values_left  <- pt_oriented.matrix[, 56 - (pt_max + (25 + 6)) + 1]
+prop_twist_pv <- t.test(values_right, values_left, alternative="greater", paired=TRUE)$p.value
+```
+
+The maximum propeller twist value is found `r pt_max` bp downstream of the motif right edge. We can use a paired t-test to compare these values with the corresponding values `r pt_max` bp upstream of the motif's left edge:
+
+This test yields a p-value of `r prop_twist_pv`.
+
+# Heatmap
+
+The sharp increase in the DNA "propeller twist" on the side of the motif with higher Twist binding is quite pronounced. We can visualize this association with a heatmap by ordering the (directionless) motifs by the difference in propeller twist between the left and right sides:
+
+``` {r, dna_shape_heatmap_plot, fig.cap="", fig.width=9, fig.height=8}
+
+mg.colors <- colorRampPalette(c("black", "white"))(33)
+
+levelplot(t(pt.matrix[nrow(pt.matrix):1, ]), col.regions=mg.colors, useRaster=TRUE, main="Propeller Twist", ylab="", xlab="", cuts=32)
+
+image(t(m.pos[nrow(m.pos):1,]), col=pos.colors, useRaster=TRUE, main="Twi ChIP-nexus")
+image(t(m.neg[nrow(m.neg):1,]), col=neg.colors, useRaster=TRUE, add=TRUE)
+
+levelplot(t(m.pos[nrow(m.pos):1, ]), col.regions=pos.colors, useRaster=TRUE, main="Twi positive strand", ylab="", xlab="", cuts=31)
+levelplot(t(m.neg[nrow(m.neg):1, ]), col.regions=neg.colors, useRaster=TRUE, main="Twi negative strand", ylab="", xlab="", cuts=31)
+```
+
+The ChIP-nexus heatmap shows that when the propeller twist difference is most extreme (at the top and bottom of the heatmap), Max appears to prefer the side with higher (less negative) propeller twist.
+
+``` {r save_pdfs, include=FALSE}
+
+pdf(figure_path("twi_ta_motifs_oriented.pdf"), width=9, height=6)
+print(g)
+dev.off()
+
+pdf(figure_path("twi_chipnexus_base_frequency.pdf"), width=9, height=6)
+print(g.bases)
+dev.off()
+
+
+pdf(figure_path("dna_shape_metaprofile.pdf"), width=9, height=6)
+print(g.mg)
+print(g.pt)
+dev.off()
+
+pdf(figure_path("propeller_twist_heatmap.pdf"), width=5, height=9)
+levelplot(t(pt.matrix[nrow(pt.matrix):1, ]), col.regions=mg.colors, useRaster=TRUE, main="Propeller Twist", ylab="", xlab="", cuts=32)
+dev.off()
+
+pdf(figure_path("twi_chipnexus_heatmap.pdf"), width=5, height=9)
+image(t(m.pos[nrow(m.pos):1,]), col=pos.colors, useRaster=TRUE, main="Twi ChIP-nexus")
+image(t(m.neg[nrow(m.neg):1,]), col=neg.colors, useRaster=TRUE, add=TRUE)
+levelplot(t(m.pos[nrow(m.pos):1, ]), col.regions=pos.colors, useRaster=TRUE, main="Twi positive strand", ylab="", xlab="", cuts=31)
+levelplot(t(m.neg[nrow(m.neg):1, ]), col.regions=neg.colors, useRaster=TRUE, main="Twi negative strand", ylab="", xlab="", cuts=31)
+dev.off()
+```
+
+``` {r references_child, child="child_docs/references_child.Rmd", eval=FALSE}
+```
+
+``` {r session_info_child, child="child_docs/session_info_child.Rmd"}
+```
+

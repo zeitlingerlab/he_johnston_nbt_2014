@@ -1,0 +1,10 @@
+html_document:
+  self_contained: false
+  theme: spacelab
+  highlight: textmate
+  toc: true
+  css: html_support/custom.css
+  lib_dir: html_support
+  mathjax: null
+data:
+  base_path: /data

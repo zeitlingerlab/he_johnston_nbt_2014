@@ -1,0 +1,111 @@
+``` {r setup, echo=FALSE, message=FALSE, include=FALSE, error=FALSE}
+library(xtable)
+library(ggplot2)
+library(plyr)
+library(BSgenome.Dmelanogaster.UCSC.dm3)
+library(parallel)
+library(rtracklayer)
+
+# Output folder for this document
+options(knitr.figure_dir = "figure_4_a_dorsal_output")
+
+source("shared_code/knitr_common.r")
+source("shared_code/granges_common.r")
+source("shared_code/samples.r")
+source("shared_code/exo_metapeak.r")
+source("shared_code/profiles_common.r")
+```
+
+# Figure 4A: Dorsal
+
+``` {r header_child, child="child_docs/header_child.Rmd"}
+```
+
+## Overview
+
+We will compare the profiles of the following samples around the top 200 dorsal motifs:
+
+``` {r dorsal_samples_table, results="asis"}
+dl.df <- subset(samples.df, sample == "dmel_embryo_dl_chipnexus_01")
+html_table(dl.df)
+```
+
+## Motif
+
+Dorsal motif: `GGRWWTTCC`
+
+Window size centered at motif: 29 bp
+
+``` {r calculate_profile_reads, include=FALSE}
+
+reads.list <- cache("reads.list.rds", function() {
+  dl.motif <- "GGRWWTTCC"
+  dl.gr <- trim(filter_chrs(vmatchPattern(dl.motif, Dmelanogaster, max.mismatch=1, fixed=FALSE)))
+
+  checked_mclapply(dl.df$sample, process_sample, dl.gr, region_size=29, mc.cores=3)
+})
+
+```
+
+## Average profile (top 200)
+
+``` {r plots_per_sample, fig.cap="", fig.width=9, fig.height=6, dpi=100}
+plots.list <- lapply(reads.list, build_plot)
+nothing <- lapply(plots.list, print)
+```
+
+``` {r zoomed_plot, warning=FALSE, fig.cap="", fig.width=9, fig.height=6, dpi=100}
+reads.df <- reads.list[[1]]
+
+motif.box <- data.frame(xmin=0, 
+                        xmax=reads.df$motif_width[1]-1,
+                        ymin=-Inf,
+                        ymax=Inf)
+                          
+g <- ggplot(reads.df, aes(x=tss_distance, y=reads, color=strand)) +
+     geom_line(size=1.2) +
+     geom_vline(xintercept=c(-5, 0:8, 13), color="gray50") +
+     geom_hline(yintercept=0, color="black") +
+     scale_colour_manual(name="Strand", values=c("+"="red", "-"="darkblue")) +
+     geom_rect(show_guide=FALSE, inherit.aes=FALSE, data=motif.box, 
+               aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), 
+               alpha=0.25, fill="gray80") +
+     theme_bw() +
+     scale_x_continuous(breaks=c(-15, -10, -5, 0, 8, 13, 18, 23), 
+                        labels=c( 15,  10,  5, 0, 0,  5, 10, 15), 
+                        limits=c(-15, 23)) +
+     theme(panel.grid.minor=element_blank(), 
+           panel.grid.major=element_blank()) +
+     labs(x="Distance to motif edge", y="Average ChIP-nexus reads", title="GGRWWTTCC") 
+g
+```
+
+``` {r save_zoomed_pdf, include=FALSE}
+pdf(figure_path("dorsal_GGRWWTTCC_profile.pdf"), width=9, height=6)
+print(g)
+dev.off()
+```
+
+## Heatmap
+
+``` {r collect_heatmap_reads, include=FALSE}
+
+beds <- list.files(figure_path(), "bed")
+names(beds) <- gsub("_top_200_motifs.bed", "", beds)
+
+sample.list <- mclapply(beds, heatmap_reads, mc.cores=4)
+```
+
+``` {r plot_heatmaps, fig.cap="", fig.width=6, fig.heigth=6, dpi=100}
+nothing <- lapply(names(sample.list), function(n) { draw_exo_heatmap(sample.list[[n]], n, 75:125)})
+```
+
+``` {r create_heatmap_pdf, include=FALSE}
+pdf(figure_path("dorsal_heatmaps.pdf"), width=6, height=6)
+nothing <- lapply(names(sample.list), function(n) { draw_exo_heatmap(sample.list[[n]], n, 75:125)})
+dev.off()
+```
+
+
+``` {r session_info_child, child="child_docs/session_info_child.Rmd"}
+```

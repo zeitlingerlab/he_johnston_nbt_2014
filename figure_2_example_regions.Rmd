@@ -1,0 +1,130 @@
+``` {r setup, echo=FALSE, message=FALSE, include=FALSE, error=FALSE}
+library(xtable)
+library(Gviz)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
+library(BSgenome.Dmelanogaster.UCSC.dm3)
+library(rtracklayer)
+
+options(knitr.figure_dir = "figure_2_example_regions_output")
+
+source("shared_code/knitr_common.r")
+source("shared_code/samples.r")
+source("shared_code/granges_common.r")
+source("shared_code/gviz_common.r")
+```
+
+# Figure 2: TBP, Dorsal and Twist examples
+
+``` {r header_child, child="child_docs/header_child.Rmd"}
+```
+
+## Overview
+
+Examples of TBP, Dorsal and Twist binding at single regions
+
+``` {r load_standard_chip_data, include=FALSE}
+dl.bw <- data_path("bigwigs/dmel_embryo_dl_chipseq_01.bw")
+tbp.bw <- data_path("bigwigs/hsap_k562_tbp_chipseq_01.bw")
+twi.bw <- data_path("bigwigs/dmel_embryo_twi_chipseq_01.bw")
+```
+
+``` {r ebox_motifs, include=FALSE}
+ebox.gr <- cache("ebox.gr.rds", function() {
+  ebox.gr <- vmatchPattern("CANNTG", Dmelanogaster, max.mismatch=0, fixed=FALSE)
+  ebox.gr <- ebox.gr[strand(ebox.gr) == "+"]
+  mcols(ebox.gr)$feature <- "EBOX"
+  mcols(ebox.gr)$id <- substr(as.character(getSeq(Dmelanogaster, ebox.gr)), 3, 4)
+  ebox.gr
+})
+
+dl_motifs.gr <- cache("dl_motifs.gr.rds", function() {
+  dl.motifs <- c("GGGAAAAACAC", 
+                 "CGGAATTTCCT",
+                 "GGGAAATTCCC",
+                 "GGGAAAAGCCCA")
+  dl.gr <- do.call(c, lapply(dl.motifs, vmatchPattern, Dmelanogaster, max.mismatch=0, fixed=TRUE))
+  strand(dl.gr) <- "*"
+  dl.gr <- reduce(dl.gr)
+  mcols(dl.gr)$feature <- "dl_motif"
+  mcols(dl.gr)$id <- "dl_motif"
+  dl.gr
+})
+ 
+```
+
+``` {r regions_table, results="asis"}
+regions.df <- subset(read.csv("internal_data/example_regions.csv", stringsAsFactors=FALSE), figure == "2")
+regions.gr <- with(regions.df, GRanges(ranges=IRanges(start=start, end=end),
+                               seqnames=chr, name=name, factor=factor))
+
+regions.df <- subset(regions.df, factor %in% c("dl", "tbp", "twi"))
+html_table(regions.df)
+```
+
+``` {r set_common_figure_options, include=FALSE}
+knitr::opts_chunk$set(dev=c("png", "pdf"), fig.cap="", fig.width=9, fig.height=9)
+```
+
+## Dorsal (embryos)
+
+``` {r dl_examples}
+
+dl.gr <- subset(regions.gr, factor == "dl")
+
+dl.nexus <- get_sample_cl("dmel_embryo_dl_chipnexus_01")
+dl.exo   <- get_sample_cl("dmel_embryo_dl_chipexo_01")
+dl.exo$gr <- c(dl.exo$gr, get_sample_cl("dmel_embryo_dl_chipexo_02")$gr)
+dl.exo$pos <- dl.exo$pos + get_sample_cl("dmel_embryo_dl_chipexo_02")$pos
+dl.exo$neg <- dl.exo$neg + get_sample_cl("dmel_embryo_dl_chipexo_02")$neg
+
+for(i in 1:length(dl.gr)) {
+  dl.i <- gviz_plot_with_exo(genome="dm3", dl.gr[i], dl.bw, dl.nexus, dl.exo, 
+                    title=paste0("(no normalization) Dorsal: ", mcols(dl.gr)$name[i]),
+                    motifs=dl_motifs.gr)
+
+  dl.i <- gviz_plot_no_exo(genome="dm3", dl.gr[i], dl.bw, dl.nexus, 
+                           title=paste0("Dorsal nexus only: ", mcols(dl.gr)$name[i]))
+  
+}
+
+```
+
+## Twist (embryos)
+
+``` {r twi_examples}
+
+twi.gr <- subset(regions.gr, factor == "twi")
+
+twi.nexus <- get_sample_cl("dmel_embryo_twi_chipnexus_01")
+twi.exo   <- get_sample_cl("dmel_embryo_twi_chipexo_01")
+
+for(i in 1:length(twi.gr)) {
+  twi.i <- gviz_plot_with_exo(genome="dm3", twi.gr[i], twi.bw, twi.nexus, twi.exo, 
+                           title=paste0("(no normalization) Twist: ", mcols(twi.gr)$name[i]),
+                           motifs=ebox.gr)
+}
+```
+
+## TBP (human)
+
+``` {r tbp_examples}
+
+tbp.gr <- subset(regions.gr, factor == "tbp")
+
+tbp.nexus <- get_sample_cl("hsap_k562_tbp_chipnexus_01")
+tbp.exo   <- get_sample_cl("hsap_k562_tbp_chipexo_02")
+
+for(i in 1:length(tbp.gr)) {
+  tbp.i <- gviz_plot_with_exo(genome="hg19", tbp.gr[i], tbp.bw, tbp.nexus, tbp.exo, 
+                                 title=paste0("(downscale ChIP-exo) TBP: ", mcols(tbp.gr)$name[i]),
+                                 normalization_method="downscale_exo")
+
+  #tbp.i <- gviz_plot_with_exo(genome="hg19", tbp.gr[i], tbp.bw, tbp.nexus, tbp.exo,
+  #                               title=paste0("(zoomed, no normalization) TBP: ", mcols(tbp.gr)$name[i]),
+  #                               zoom_to_nexus_scale=TRUE)
+}
+```
+
+``` {r session_info_child, child="child_docs/session_info_child.Rmd"}
+```

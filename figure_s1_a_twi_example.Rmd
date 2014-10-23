@@ -1,0 +1,71 @@
+``` {r setup, echo=FALSE, message=FALSE, include=FALSE, error=FALSE}
+library(xtable)
+library(Gviz)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
+library(BSgenome.Dmelanogaster.UCSC.dm3)
+library(rtracklayer)
+
+options(knitr.figure_dir = "figure_s1_a_twi_example_output")
+
+source("shared_code/knitr_common.r")
+source("shared_code/samples.r")
+source("shared_code/granges_common.r")
+source("shared_code/gviz_common.r")
+```
+
+# Figure S1 Panel A: Max example region
+
+``` {r header_child, child="child_docs/header_child.Rmd"}
+```
+
+## Overview
+
+Examples of Twist binding at a single region
+
+``` {r load_standard_chip_data, include=FALSE}
+twi.bw <- data_path("bigwigs/dmel_embryo_twi_chipseq_01.bw")
+```
+
+``` {r ebox_motifs, include=FALSE}
+ebox.gr <- cache("ebox.gr.rds", function() {
+  ebox.gr <- vmatchPattern("CANNTG", Dmelanogaster, max.mismatch=0, fixed=FALSE)
+  ebox.gr <- ebox.gr[strand(ebox.gr) == "+"]
+  mcols(ebox.gr)$feature <- "EBOX"
+  mcols(ebox.gr)$id <- substr(as.character(getSeq(Dmelanogaster, ebox.gr)), 3, 4)
+  ebox.gr
+})
+ 
+```
+
+``` {r regions_table, results="asis"}
+regions.df <- subset(read.csv("internal_data/example_regions.csv", stringsAsFactors=FALSE), figure == "s1")
+regions.gr <- with(regions.df, GRanges(ranges=IRanges(start=start, end=end),
+                               seqnames=chr, name=name, factor=factor))
+
+html_table(regions.df)
+```
+
+``` {r set_common_figure_options, include=FALSE}
+knitr::opts_chunk$set(dev=c("png", "pdf"), fig.cap="", fig.width=9, fig.height=9)
+```
+
+## Twist (Drosophila embryos)
+
+``` {r twi_examples, dev=c("png", "pdf"), fig.cap="", fig.width=9, fig.height=8, dpi=300}
+
+twi.gr <- subset(regions.gr, factor == "twi")
+
+twi.nexus <- get_sample_cl("dmel_embryo_twi_chipnexus_01")
+twi.exo   <- get_sample_cl("dmel_embryo_twi_chipexo_01")
+
+for(i in 1:length(twi.gr)) {
+  twi.i <- gviz_plot_with_exo(genome="dm3", twi.gr[i], twi.bw, twi.nexus, twi.exo,
+                            title=paste0("Twist: ", mcols(twi.gr)$name[i]),
+                            motifs=ebox.gr)
+}
+
+```
+
+``` {r session_info_child, child="child_docs/session_info_child.Rmd"}
+```

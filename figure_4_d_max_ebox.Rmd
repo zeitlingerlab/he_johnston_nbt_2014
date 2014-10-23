@@ -1,0 +1,147 @@
+``` {r setup, echo=FALSE, message=FALSE, include=FALSE, error=FALSE}
+library(xtable)
+library(ggplot2)
+library(plyr)
+library(BSgenome.Dmelanogaster.UCSC.dm3)
+library(parallel)
+library(rtracklayer)
+
+# Output folder for this document
+options(knitr.figure_dir = "figure_4_d_max_ebox_output")
+
+source("shared_code/knitr_common.r")
+source("shared_code/granges_common.r")
+source("shared_code/samples.r")
+source("shared_code/exo_metapeak.r")
+source("shared_code/ggplot_theme.r")
+```
+
+# Figure 4D: Max ChIP-nexus profiles at EBOX variants
+
+``` {r header_child, child="child_docs/header_child.Rmd"}
+```
+
+## Overview
+
+We will compare the profiles of the following samples around the top 200 EBOX motifs per variant:
+
+``` {r max_samples_table, results="asis"}
+max.df <- subset(samples.df, antibody == "max")
+html_table(max.df)
+```
+
+## Motif variants
+
+``` {r motif_variants_table, results='asis'}
+
+motifs <- c("CAAATG", "CAACTG", "CAAGTG", "CAATTG",
+            "CACATG", "CACCTG", "CACGTG",
+            "CAGATG", "CAGCTG",
+            "CATATG")
+
+motif_names <- c("AA/TT", "AC/GT", "AG/CT", "AT",
+                 "CA/TG", "CC/GG", "CG",
+                 "GA/TC", "GC",
+                 "TA")
+
+motifs.df <- data.frame(stringsAsFactors=FALSE, motif_name=motif_names, sequence=motifs)
+html_table(motifs.df)
+```
+
+``` {r helper_functions, include=FALSE}
+
+top_motifs_for_sample <- function(sample_name, motifs.gr, n=200) {
+  motif_regions.gr <- trim(resize(motifs.gr, width=51, fix="center"))
+  mcols(motifs.gr)$signal <- regionSums(motif_regions.gr, get_sample_cl(sample_name)$cov)
+  
+      
+  motifs.no_strand <- motifs.gr
+  strand(motifs.no_strand) <- "*"
+
+  motif.areas <- as(slice(coverage(reduce(motifs.no_strand)), 1), "GRanges")
+
+  ol <- as.data.frame(findOverlaps(motif.areas, motifs.no_strand, select="all", ignore.strand=TRUE))
+  ol$exo_signal <- mcols(motifs.gr)$signal[ol$subjectHits]
+  
+  ol <- arrange(ol, queryHits, plyr::desc(exo_signal))
+  ol <- ol[!duplicated(ol$queryHits), ]
+
+  stopifnot(length(which(duplicated(ol$subjectHits) == FALSE)) == nrow(ol))
+
+  motifs.gr <- motifs.gr[ol$subjectHits]
+  
+  motifs.gr <- motifs.gr[order(mcols(motifs.gr)$signal, decreasing=TRUE)]
+  motifs.gr[1:n]
+}
+
+process_single_variant <- function(i, motifs.df, sample_name) {
+  motif <- motifs.df$sequence[i]
+  motif_name <- motifs.df$motif_name[i]
+  
+  motifs.gr <- trim(filter_chrs(vmatchPattern(motif, Dmelanogaster, max.mismatch=0)))
+  
+  top_motifs.gr <- top_motifs_for_sample(sample_name, motifs.gr)
+  export(top_motifs.gr, figure_path(paste0(motif, "_top_", length(top_motifs.gr), "_max.bed")))
+
+  top_motifs.gr <- resize(top_motifs.gr, width=1)
+
+  reads <- exo_metapeak(top_motifs.gr, get_sample_cl(sample_name), upstream=40, downstream=50)
+  reads$sample_name <- sample_name
+  reads$motif_name <- motif_name
+  reads$motif_width <- width(motifs.gr)[1]
+  reads
+}
+
+```
+
+``` {r calculate_motif_reads, include=FALSE}
+
+reads.list <- cache("reads.list.rds", function() {
+  lapply(max.df$sample, function(s) {
+    checked_mclapply(1:nrow(motifs.df), process_single_variant, motifs.df, s, mc.cores=3, mc.preschedule=FALSE)  
+  })
+})
+
+```
+
+``` {r plots_per_sample, warning=FALSE, fig.cap="", fig.width=12, fig.height=6, dpi=100}
+
+build_plot <- function(reads.l) {
+  reads.df <- do.call(rbind, reads.l)
+
+  plot_title <- reads.df$sample_name[1]
+
+  motif.box <- data.frame(xmin=0, 
+                          xmax=reads.df$motif_width[1]-1,
+                          ymin=-Inf,
+                          ymax=Inf)
+                          
+  g <- ggplot(reads.df, aes(x=tss_distance, y=reads, color=strand)) +
+       geom_line(size=1.1) +
+       scale_colour_manual(name="Strand", values=c("+"="red", "-"="darkblue")) +
+       facet_wrap(~ motif_name, ncol=5) +
+       scale_x_continuous(breaks=c(-20, -10, 0, 5, 15, 25),
+                          labels=c(-20, -10, 0, 0, 10, 20), 
+                          limits=c(-30, 35)) +
+       geom_rect(show_guide=FALSE, inherit.aes=FALSE, data=motif.box, 
+                 aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), 
+                 alpha=0.25, fill="gray80") +
+       theme_bw() +
+       theme(panel.grid.minor=element_blank(),
+             panel.grid.major=element_blank()) +
+       labs(x="Distance to motif edge", y="Average ChIP-nexus reads", title=plot_title)
+  g
+}
+
+gl.ebox <- lapply(reads.list, build_plot)
+nothing <- lapply(gl.ebox, print)
+```
+
+``` {r save_pdf, include=FALSE}
+pdf(figure_path("max_ebox_variants.pdf"), width=12, height=6)
+nothing <- lapply(gl.ebox, print)
+dev.off()
+```
+
+``` {r session_info_child, child="child_docs/session_info_child.Rmd"}
+```

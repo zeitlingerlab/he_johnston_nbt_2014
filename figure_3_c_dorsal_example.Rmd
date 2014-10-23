@@ -1,0 +1,56 @@
+``` {r setup, echo=FALSE, message=FALSE, include=FALSE, error=FALSE}
+library(xtable)
+library(Gviz)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
+library(BSgenome.Dmelanogaster.UCSC.dm3)
+library(rtracklayer)
+
+options(knitr.figure_dir = "figure_3_c_dorsal_example_output")
+
+source("shared_code/knitr_common.r")
+source("shared_code/samples.r")
+source("shared_code/granges_common.r")
+source("shared_code/gviz_common.r")
+```
+
+# Figure 3C: Dorsal ChIP-nexus and ChIP-seq at dpp
+
+``` {r header_child, child="child_docs/header_child.Rmd"}
+```
+
+``` {r load_standard_chip_data, include=FALSE}
+dl.bw <- data_path("bigwigs/dmel_embryo_dl_chipseq_01.bw")
+```
+
+``` {r regions_table, results="asis"}
+regions.df <- subset(read.csv("internal_data/example_regions.csv", stringsAsFactors=FALSE), figure == "3")
+regions.gr <- with(regions.df, GRanges(ranges=IRanges(start=start, end=end),
+                               seqnames=chr, name=name, factor=factor))
+
+regions.df <- subset(regions.df, factor %in% c("dl"))
+html_table(regions.df)
+```
+
+``` {r set_common_figure_options, include=FALSE}
+knitr::opts_chunk$set(dev=c("png", "pdf"), fig.cap="", fig.width=9, fig.height=9)
+```
+
+## Dorsal (embryos)
+
+``` {r dl_examples}
+
+dl.gr <- subset(regions.gr, factor == "dl")
+
+dl.nexus <- get_sample_cl("dmel_embryo_dl_chipnexus_01")
+
+for(i in 1:length(dl.gr)) {
+  dl.i <- gviz_plot_no_exo(genome="dm3", dl.gr[i], dl.bw, dl.nexus, 
+                           title=paste0("Dorsal at dpp"))
+  
+}
+
+```
+
+``` {r session_info_child, child="child_docs/session_info_child.Rmd"}
+```

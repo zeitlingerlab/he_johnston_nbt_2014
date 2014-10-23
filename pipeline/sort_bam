@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo Sorting $1
+SORTED_NAME=`basename $1 .bam`_sorted
+samtools sort -m 2G -@ 5 $1 $SORTED_NAME
+if [ -e ${SORTED_NAME}.bam ]
+then
+  rm -f $1
+  mv ${SORTED_NAME}.bam $1
+fi

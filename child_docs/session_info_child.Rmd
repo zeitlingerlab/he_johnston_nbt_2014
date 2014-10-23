@@ -1,0 +1,7 @@
+## Session information
+
+For reproducibility, this analysis was performed with the following R/Bioconductor session:
+
+``` {r session_info, echo=FALSE, comment=NA}
+sessionInfo()
+```

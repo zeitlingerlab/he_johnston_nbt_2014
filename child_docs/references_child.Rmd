@@ -1,0 +1,5 @@
+## References
+
+``` {r references, echo=FALSE, results="asis"}
+bibliography()
+```

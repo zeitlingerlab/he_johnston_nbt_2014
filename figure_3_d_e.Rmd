@@ -1,0 +1,125 @@
+``` {r setup, echo=FALSE, message=FALSE, include=FALSE, error=FALSE}
+library(xtable)
+library(GenomicRanges)
+library(BSgenome.Dmelanogaster.UCSC.dm3)
+library(ggplot2)
+library(reshape2)
+library(colorspace)
+library(dplyr)
+
+# Output folder for this document
+options(knitr.figure_dir = "figure_3_d_e_output")
+
+source("shared_code/knitr_common.r")
+source("shared_code/granges_common.r")
+source("shared_code/samples.r")
+source("shared_code/exo_metapeak.r")
+source("shared_code/motif_specificity.r")
+source("shared_code/ggplot_theme.r")
+```
+
+# Figure 3D and 3E: ChIP-seq vs ChIP-nexus motif specificity
+
+``` {r header_child, child="child_docs/header_child.Rmd"}
+```
+
+## Overview
+
+``` {r build_motif_coverage, include=FALSE}
+
+dl.cov <- cache("dl.cov.rds", function() {
+  dl.motif <- "GGRWWTTCC"
+  dl.gr <- trim(filter_chrs(vmatchPattern(dl.motif, Dmelanogaster, max.mismatch=1, fixed=FALSE)))
+  strand(dl.gr) <- "+"
+  coverage(reduce(dl.gr))
+})
+
+twi.cov <- cache("twi.cov.rds", function() {
+  twi.motif <- c("CABATG")
+  twi.gr <- trim(filter_chrs(vmatchPattern(twi.motif, Dmelanogaster, max.mismatch=0, fixed=FALSE)))
+  strand(twi.gr) <- "+"
+  coverage(reduce(twi.gr))
+})
+
+```
+
+``` {r common, include=FALSE}
+
+knitr::opts_chunk$set(fig.cap="", fig.width=9, fig.height=7, dev=c("png", "pdf"))
+
+peak_count <- 200
+
+```
+
+**Using top `r peak_count` peaks**
+
+## Dorsal
+
+``` {r dl_profiles}
+
+dl_chipseq.bw <- data_path("bigwigs/dmel_embryo_dl_chipseq_01.bw")
+
+dl_chipseq_peaks.gr <- trim(resize_around_summit(import_and_filter_macs("peak_calling/macs/dmel_embryo_dl_chipseq_01_summits.bed.gz"), 1))
+dl_chipseq_peaks.gr <- dl_chipseq_peaks.gr[order(dl_chipseq_peaks.gr$score, decreasing=TRUE)][1:peak_count]
+
+dl_chipnexus_peaks.gr <- trim(resize_around_summit(import_and_filter_macs("peak_calling/macs/dmel_embryo_dl_chipnexus_01_summits.bed.gz"), 1))
+dl_chipnexus_peaks.gr <- dl_chipnexus_peaks.gr[order(dl_chipnexus_peaks.gr$score, decreasing=TRUE)][1:peak_count]
+
+dl.data <- cache("dl.data.rds", function() {
+  reads_for_peaks(dl_chipseq_peaks.gr, dl_chipnexus_peaks.gr,
+                  dl_chipseq.bw, dmel_embryo_dl_chipnexus_01.cl,
+                  dl.cov, window_size=200)
+})
+
+dl.plots <- plots_for_factor("Dorsal", dl.data)
+print(dl.plots$motifs)
+```
+
+``` {r dl_nearest_motif}
+dl.nearest <- nearest_motif_plot("Dorsal", dl_chipseq_peaks.gr, dl_chipnexus_peaks.gr, dl.cov)
+print(dl.nearest$plot)
+```
+
+``` {r dl_pvalues, results="asis"}
+dl.df <- dl.nearest$data
+dl_tests.df <- chisq_testing_results(dl.df)
+dl_tests.df$pvalue <- as.character(dl_tests.df$pvalue)
+html_table(dl_tests.df %>% as.data.frame)
+```
+
+## Twist
+
+``` {r twi_profiles}
+
+twi_chipseq.bw <- data_path("bigwigs/dmel_embryo_twi_chipseq_01.bw")
+
+twi_chipseq_peaks.gr <- trim(resize_around_summit(import_and_filter_macs("peak_calling/macs/dmel_embryo_twi_chipseq_01_summits.bed.gz"), 1))
+twi_chipseq_peaks.gr <- twi_chipseq_peaks.gr[order(twi_chipseq_peaks.gr$score, decreasing=TRUE)][1:peak_count]
+
+twi_chipnexus_peaks.gr <- trim(resize_around_summit(import_and_filter_macs("peak_calling/macs/dmel_embryo_twi_chipnexus_01_summits.bed.gz"), 1))
+twi_chipnexus_peaks.gr <- twi_chipnexus_peaks.gr[order(twi_chipnexus_peaks.gr$score, decreasing=TRUE)][1:peak_count]
+
+twi.data <- cache("twi.data.rds", function() {
+  reads_for_peaks(twi_chipseq_peaks.gr, twi_chipnexus_peaks.gr,
+                  twi_chipseq.bw, dmel_embryo_twi_chipnexus_01.cl,
+                  twi.cov, window_size=200)
+})
+
+twi.plots <- plots_for_factor("Twist", twi.data)
+print(twi.plots$motifs)
+```
+
+``` {r twi_nearest_motif}
+twi.nearest <- nearest_motif_plot("Twist", twi_chipseq_peaks.gr, twi_chipnexus_peaks.gr, twi.cov)
+print(twi.nearest$plot)
+```
+
+``` {r twi_pvalues, results="asis"}
+twi.df <- twi.nearest$data
+twi_tests.df <- chisq_testing_results(twi.df)
+twi_tests.df$pvalue <- as.character(twi_tests.df$pvalue)
+html_table(twi_tests.df %>% as.data.frame)
+```
+
+``` {r session_info_child, child="child_docs/session_info_child.Rmd"}
+```

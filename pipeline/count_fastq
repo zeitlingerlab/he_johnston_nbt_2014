@@ -1,0 +1,6 @@
+#!/bin/bash
+
+FASTQ_LINES=`pigz -dcp 4 $1 | wc -l`
+FASTQ_LINES=`expr $FASTQ_LINES / 4`
+echo $FASTQ_LINES
+

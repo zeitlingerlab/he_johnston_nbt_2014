@@ -1,0 +1,241 @@
+``` {r setup, echo=FALSE, message=FALSE, include=FALSE, error=FALSE}
+library(xtable)
+library(magrittr)
+library(ggplot2)
+library(BSgenome.Dmelanogaster.UCSC.dm3)
+library(BSgenome.Hsapiens.UCSC.hg19)
+
+# Output folder for this document
+options(knitr.figure_dir = "figure_3_a_b_output")
+
+source("shared_code/knitr_common.r")
+source("shared_code/granges_common.r")
+source("shared_code/samples.r")
+source("shared_code/ggplot_theme.r")
+```
+
+# Figure 3
+
+``` {r header_child, child="child_docs/header_child.Rmd"}
+```
+
+## Overview
+
+MACS v2 was run on ChIP-nexus samples with these settings: `--keep-dup=all --call-summits` and `-g dm` or `-g hg`, depending on species.
+
+``` {r set_bigwig_paths, include=FALSE}
+
+chipseq.bws <- list(hsap_k562_tbp_chipseq_01=data_path("bigwigs/hsap_k562_tbp_chipseq_01.bw"),
+                    dmel_embryo_twi_chipseq_01=data_path("bigwigs/dmel_embryo_twi_chipseq_01.bw"),
+                    dmel_embryo_dl_chipseq_01=data_path("bigwigs/dmel_embryo_dl_chipseq_01.bw"))
+
+```
+
+``` {r macs_import, include=FALSE}
+
+factor_name_from_filename <- function(filename) {
+  gsub("^...._.*_(.*)_chip.*_0._.*$", "\\1", basename(filename))
+}
+
+import_and_filter_peaks <- function(filename, max.peaks=10000) {
+  factor_name <- factor_name_from_filename(filename)
+
+  peaks.gr <- filter_chrs(import(filename))
+  peaks.gr <- peaks.gr[order(peaks.gr$score, decreasing=TRUE)]
+  peaks.gr <- resize(peaks.gr, width=201, fix="center")
+  peaks.gr <- peaks.gr[1:min(c(length(peaks.gr), max.peaks))]
+  
+  peaks.gr
+}
+
+peak_summary_table <- function(grl) {
+  data.frame(sample=names(grl), 
+             peaks=pn(elementLengths(grl)),
+             median_width=sapply(grl, function(gr) { median(width(gr)) }))
+}
+
+chipseq_peak_files <- list.files("peak_calling/macs", "chipseq.*bed\\.gz$", full.names=TRUE)
+chipseq.grl <- cache("chipseq.grl.rds", function() {
+  lapply(chipseq_peak_files, import_and_filter_peaks)
+})
+
+names(chipseq.grl) <- chipseq_peak_files %>% 
+                      gsub("_summits\\.bed\\.gz$", "", .) %>%
+                      gsub("peak_calling/macs/", "", .)
+
+chipnexus_peak_files <- list.files("peak_calling/macs", "chipnexus.*bed\\.gz$", full.names=TRUE)
+chipnexus.grl <- cache("chipnexus.grl.rds", function() {
+  lapply(chipnexus_peak_files, import_and_filter_peaks)
+})
+
+names(chipnexus.grl) <- chipnexus_peak_files %>% 
+                      gsub("_summits\\.bed\\.gz$", "", .) %>%
+                      gsub("peak_calling/macs/", "", .)
+
+```
+
+``` {r scatterplots_common}
+
+add_signal <- function(peaks.gr, sample1.cov, sample2.cov) {
+  mcols(peaks.gr)$signal_1 <- regionSums(peaks.gr, sample1.cov)
+  mcols(peaks.gr)$signal_2 <- regionSums(peaks.gr, sample2.cov)
+  peaks.gr
+}
+
+finite_range <- function(values) {
+  values <- values[is.finite(values)]
+  list(max=max(values), min=min(values))
+}
+
+make_plot <- function(peaks.gr, title, sample1, sample2) {
+
+  if(length(grep("chipseq", sample1)) > 0) {
+    sample1.cov <- chipseq.bws[[sample1]]
+  } else {
+    sample1.cov <- get_sample_cl(sample1)$cov
+  }
+
+  if(length(grep("chipseq", sample2)) > 0) {
+    sample2.cov <- chipseq.bws[[sample2]]
+  } else {
+    sample2.cov <- get_sample_cl(sample2)$cov
+  }
+
+  peaks.gr <- add_signal(peaks.gr, sample1.cov, sample2.cov)
+
+  pearson.cor <- round(with(mcols(peaks.gr), cor(signal_1, signal_2, method="pearson")), 3)
+
+  xmin <- min(log2(mcols(peaks.gr)$signal_1))
+  ymax <- max(log2(mcols(peaks.gr)$signal_2))
+
+  even_numbers <- seq(from=0, to=50, by=2)
+
+  xrange <- finite_range(log2(mcols(peaks.gr)$signal_1))
+  yrange <- finite_range(log2(mcols(peaks.gr)$signal_2))
+
+  xbreaks <- even_numbers[even_numbers >= xrange$min & even_numbers <= xrange$max]
+  ybreaks <- even_numbers[even_numbers >= yrange$min & even_numbers <= yrange$max]
+
+  g <- ggplot(as.data.frame(peaks.gr), aes(x=log2(signal_1), y=log2(signal_2))) +
+       geom_point(size=1, alpha=0.5, color="black") +
+       scale_x_continuous(breaks=xbreaks) +
+       scale_y_continuous(breaks=ybreaks) +
+       annotate("text", x=xmin, y=ymax, 
+                color="darkblue",
+                hjust=-1,
+                label=paste0("Pearson: ", pearson.cor)) +
+       theme_manuscript(16) +
+       labs(x=paste0(sample1, " signal (log2)"),
+            y=paste0(sample2, " signal (log2)"),
+            title=title)
+  g
+}
+
+make_plot_with_labels <- function(peaks.gr, title, sample1, sample2, labeled_regions.gr) {
+
+  ol <- as.data.frame(findOverlaps(peaks.gr, labeled_regions.gr, ignore.strand=TRUE))
+  peaks.gr$region_label <- ""
+  peaks.gr$region_label[ol$queryHits] <- paste0("  ", labeled_regions.gr$name[ol$subjectHits])
+  peaks.gr$known_enhancer <- "No"
+  peaks.gr$known_enhancer[ol$queryHits] <- "Yes"
+
+  if(length(grep("chipseq", sample1)) > 0) {
+    sample1.cov <- chipseq.bws[[sample1]]
+  } else {
+    sample1.cov <- get_sample_cl(sample1)$cov
+  }
+
+  if(length(grep("chipseq", sample2)) > 0) {
+    sample2.cov <- chipseq.bws[[sample2]]
+  } else {
+    sample2.cov <- get_sample_cl(sample2)$cov
+  }
+
+  peaks.gr <- add_signal(peaks.gr, sample1.cov, sample2.cov)
+
+  pearson.cor <- round(with(mcols(peaks.gr), cor(signal_1, signal_2, method="pearson")), 3)
+
+  xmin <- min(log2(mcols(peaks.gr)$signal_1))
+  ymax <- max(log2(mcols(peaks.gr)$signal_2))
+
+  even_numbers <- seq(from=0, to=50, by=2)
+
+  xrange <- finite_range(log2(mcols(peaks.gr)$signal_1))
+  yrange <- finite_range(log2(mcols(peaks.gr)$signal_2))
+
+  xbreaks <- even_numbers[even_numbers >= xrange$min & even_numbers <= xrange$max]
+  ybreaks <- even_numbers[even_numbers >= yrange$min & even_numbers <= yrange$max]
+
+  g <- ggplot(as.data.frame(peaks.gr), aes(x=log2(signal_1), y=log2(signal_2), color=known_enhancer)) +
+       geom_point(aes(size=known_enhancer), alpha=0.5) +
+       scale_size_manual(values=c("Yes"=3, "No"=1), guide="none") +
+       geom_text(data=subset(as.data.frame(peaks.gr), region_label != ""), 
+                             size=3, hjust=0, vjust=0, color="red",
+                             aes(label=region_label)) +
+       scale_colour_manual(name="Known enhancer", 
+                           values=c("Yes"="red", "No"="black"), 
+                           guide=guide_legend(override.aes=list(alpha=1, size=3))) +
+       scale_x_continuous(breaks=xbreaks) +
+       scale_y_continuous(breaks=ybreaks) +
+       annotate("text", x=xmin, y=ymax, 
+                color="darkblue",
+                hjust=-1,
+                label=paste0("Pearson: ", pearson.cor)) +
+       theme_manuscript(16) +
+       labs(x=paste0(sample1, " signal (log2)"),
+            y=paste0(sample2, " signal (log2)"),
+            title=title)
+  g
+}
+
+knitr::opts_chunk$set(dev=c("png", "pdf"))
+knitr::opts_chunk$set(fig.cap="", fig.width=7, fig.height=7)
+```
+
+## Figure 3A
+
+``` {r tbp_and_dorsal_chipnexus_vs_chipnexus}
+
+make_plot(chipnexus.grl[["hsap_k562_tbp_chipnexus_01"]],
+          "TBP ChIP-nexus peaks: replicate comparison",
+          "hsap_k562_tbp_chipnexus_01",
+          "hsap_k562_tbp_chipnexus_02")
+
+
+make_plot(chipnexus.grl[["dmel_embryo_dl_chipnexus_01"]],
+          "Dorsal ChIP-nexus peaks: replicate comparison",
+          "dmel_embryo_dl_chipnexus_01",
+          "dmel_embryo_dl_chipnexus_02")
+
+```
+
+## Figure 3B
+
+``` {r tbp_and_dorsal_chipseq_vs_chipnexus}
+
+make_plot(chipseq.grl[["hsap_k562_tbp_chipseq_01"]],
+          "TBP ChIP-seq peaks vs ChIP-nexus",
+          "hsap_k562_tbp_chipseq_01",
+          "hsap_k562_tbp_chipnexus_01")
+
+
+make_plot(chipseq.grl[["dmel_embryo_dl_chipseq_01"]],
+          "Dorsal ChIP-seq peaks vs ChIP-nexus",
+          "dmel_embryo_dl_chipseq_01",
+          "dmel_embryo_dl_chipnexus_01")
+
+known.df <- subset(read.csv("internal_data/dl_known_targets.csv", stringsAsFactors=FALSE), name %in% c("rho", "dpp", "vn", "vnd"))
+known.gr <- makeGRangesFromDataFrame(known.df, keep.extra=TRUE)
+
+make_plot_with_labels(chipseq.grl[["dmel_embryo_dl_chipseq_01"]],
+          "Dorsal ChIP-seq peaks vs ChIP-nexus",
+          "dmel_embryo_dl_chipseq_01",
+          "dmel_embryo_dl_chipnexus_01",
+          known.gr)
+
+```
+
+
+
+``` {r session_info_child, child="child_docs/session_info_child.Rmd"}
+```
