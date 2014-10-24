@@ -92,7 +92,7 @@ biocLite(bioc_packages)
 
 ```bash
 cd /home/ubuntu
-git clone https://github.com/zeitlingerlab/TODO analysis_code
+git clone https://github.com/zeitlingerlab/he_johnston_nbt_2014 analysis_code
 ```
 
 ## Install cutadapt
