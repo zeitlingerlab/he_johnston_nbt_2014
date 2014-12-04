@@ -6,7 +6,7 @@ library(BSgenome.Dmelanogaster.UCSC.dm3)
 library(BSgenome.Hsapiens.UCSC.hg19)
 
 # Output folder for this document
-options(knitr.figure_dir = "figure_3_a_b_output")
+options(knitr.figure_dir = "figure_2_a_b_output")
 
 source("shared_code/knitr_common.r")
 source("shared_code/granges_common.r")
@@ -14,7 +14,7 @@ source("shared_code/samples.r")
 source("shared_code/ggplot_theme.r")
 ```
 
-# Figure 3
+# Figure 2
 
 ``` {r header_child, child="child_docs/header_child.Rmd"}
 ```
@@ -192,7 +192,7 @@ knitr::opts_chunk$set(dev=c("png", "pdf"))
 knitr::opts_chunk$set(fig.cap="", fig.width=7, fig.height=7)
 ```
 
-## Figure 3A
+## Figure 2A
 
 ``` {r tbp_and_dorsal_chipnexus_vs_chipnexus}
 
@@ -209,7 +209,7 @@ make_plot(chipnexus.grl[["dmel_embryo_dl_chipnexus_01"]],
 
 ```
 
-## Figure 3B
+## Figure 2B
 
 ``` {r tbp_and_dorsal_chipseq_vs_chipnexus}
 

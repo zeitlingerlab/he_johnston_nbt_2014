@@ -8,7 +8,7 @@ library(colorspace)
 library(dplyr)
 
 # Output folder for this document
-options(knitr.figure_dir = "figure_3_d_e_output")
+options(knitr.figure_dir = "figure_2_d_e_output")
 
 source("shared_code/knitr_common.r")
 source("shared_code/granges_common.r")
@@ -18,7 +18,7 @@ source("shared_code/motif_specificity.r")
 source("shared_code/ggplot_theme.r")
 ```
 
-# Figure 3D and 3E: ChIP-seq vs ChIP-nexus motif specificity
+# Figure 2D and 2E: ChIP-seq vs ChIP-nexus motif specificity
 
 ``` {r header_child, child="child_docs/header_child.Rmd"}
 ```

@@ -10,7 +10,7 @@ library(knitcitations)
 library(lattice)
 
 # Output folder for this document
-options(knitr.figure_dir = "figure_5_b_c_d_e_f_output")
+options(knitr.figure_dir = "figure_4_b_c_d_e_f_output")
 
 source("shared_code/knitr_common.r")
 source("shared_code/exo_metapeak.r")
@@ -27,7 +27,7 @@ source("shared_code/samples.r")
 
 We will first orient the Max motifs "towards" the side with the greater Max ChIP-nexus signal. As the motif is palindromic, we can simply assign a strand to the motif to give it a direction. We will define positive-strand motifs as those where the Max signal is greatest to the right of the motif, and negative-strand motifs will be those where the Max signal is greatest to the left.
 
-We'll start with the top 200 **`CACGTG`** motifs shown in Figure 4C. After assigning a direction to each motif, we can plot a ChIP-nexus metapeak to verify that we have properly oriented the motifs toward the direction of highest Max signal:
+We'll start with the top 200 **`CACGTG`** motifs shown in Figure 3C. After assigning a direction to each motif, we can plot a ChIP-nexus metapeak to verify that we have properly oriented the motifs toward the direction of highest Max signal:
 
 ``` {r orient_max_motifs, include=FALSE}
 

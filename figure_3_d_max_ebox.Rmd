@@ -7,7 +7,7 @@ library(parallel)
 library(rtracklayer)
 
 # Output folder for this document
-options(knitr.figure_dir = "figure_4_e_twi_ebox_output")
+options(knitr.figure_dir = "figure_3_d_max_ebox_output")
 
 source("shared_code/knitr_common.r")
 source("shared_code/granges_common.r")
@@ -16,7 +16,7 @@ source("shared_code/exo_metapeak.r")
 source("shared_code/ggplot_theme.r")
 ```
 
-# Figure 4E: Twist ChIP-nexus profiles at EBOX variants
+# Figure 3D: Max ChIP-nexus profiles at EBOX variants
 
 ``` {r header_child, child="child_docs/header_child.Rmd"}
 ```
@@ -26,8 +26,8 @@ source("shared_code/ggplot_theme.r")
 We will compare the profiles of the following samples around the top 200 EBOX motifs per variant:
 
 ``` {r max_samples_table, results="asis"}
-twi.df <- subset(samples.df, antibody == "twi")
-html_table(twi.df)
+max.df <- subset(samples.df, antibody == "max")
+html_table(max.df)
 ```
 
 ## Motif variants
@@ -81,7 +81,7 @@ process_single_variant <- function(i, motifs.df, sample_name) {
   motifs.gr <- trim(filter_chrs(vmatchPattern(motif, Dmelanogaster, max.mismatch=0)))
   
   top_motifs.gr <- top_motifs_for_sample(sample_name, motifs.gr)
-  export(top_motifs.gr, figure_path(paste0(motif, "_top_", length(top_motifs.gr), "_twi.bed")))
+  export(top_motifs.gr, figure_path(paste0(motif, "_top_", length(top_motifs.gr), "_max.bed")))
 
   top_motifs.gr <- resize(top_motifs.gr, width=1)
 
@@ -97,7 +97,7 @@ process_single_variant <- function(i, motifs.df, sample_name) {
 ``` {r calculate_motif_reads, include=FALSE}
 
 reads.list <- cache("reads.list.rds", function() {
-  lapply(twi.df$sample, function(s) {
+  lapply(max.df$sample, function(s) {
     checked_mclapply(1:nrow(motifs.df), process_single_variant, motifs.df, s, mc.cores=3, mc.preschedule=FALSE)  
   })
 })
@@ -138,7 +138,7 @@ nothing <- lapply(gl.ebox, print)
 ```
 
 ``` {r save_pdf, include=FALSE}
-pdf(figure_path("twi_ebox_variants.pdf"), width=12, height=6)
+pdf(figure_path("max_ebox_variants.pdf"), width=12, height=6)
 nothing <- lapply(gl.ebox, print)
 dev.off()
 ```

@@ -7,42 +7,44 @@ library(parallel)
 library(rtracklayer)
 
 # Output folder for this document
-options(knitr.figure_dir = "figure_4_a_dorsal_output")
+options(knitr.figure_dir = "figure_3_b_twi_output")
 
 source("shared_code/knitr_common.r")
 source("shared_code/granges_common.r")
 source("shared_code/samples.r")
 source("shared_code/exo_metapeak.r")
 source("shared_code/profiles_common.r")
+source("shared_code/ggplot_theme.r")
 ```
 
-# Figure 4A: Dorsal
+# Figure 3B: Twist ChIP-nexus
 
 ``` {r header_child, child="child_docs/header_child.Rmd"}
 ```
 
 ## Overview
 
-We will compare the profiles of the following samples around the top 200 dorsal motifs:
+We will compare the profiles of the following samples around the top 200 Twist `CABATG` motifs:
 
-``` {r dorsal_samples_table, results="asis"}
-dl.df <- subset(samples.df, sample == "dmel_embryo_dl_chipnexus_01")
-html_table(dl.df)
+``` {r max_samples_table, results="asis"}
+twi.df <- subset(samples.df, sample == "dmel_embryo_twi_chipnexus_01")
+html_table(twi.df)
 ```
 
 ## Motif
 
-Dorsal motif: `GGRWWTTCC`
+E-BOX motif: `CABATG`
 
-Window size centered at motif: 29 bp
+Window size centered at motif: 51 bp
 
 ``` {r calculate_profile_reads, include=FALSE}
 
 reads.list <- cache("reads.list.rds", function() {
-  dl.motif <- "GGRWWTTCC"
-  dl.gr <- trim(filter_chrs(vmatchPattern(dl.motif, Dmelanogaster, max.mismatch=1, fixed=FALSE)))
+  twi.motifs <- c("CACATG", "CATGTG", "CAGATG", "CATCTG", "CATATG")
+  twi.gr <- filter_chrs(do.call(c, lapply(twi.motifs, vmatchPattern, Dmelanogaster, max.mismatch=0, fixed=TRUE)))
+  twi.gr <- twi.gr[strand(twi.gr) == "+"]
 
-  checked_mclapply(dl.df$sample, process_sample, dl.gr, region_size=29, mc.cores=3)
+  checked_mclapply(twi.df$sample, process_sample, twi.gr, n=200, region_size=51, mc.cores=2)
 })
 
 ```
@@ -64,24 +66,21 @@ motif.box <- data.frame(xmin=0,
                           
 g <- ggplot(reads.df, aes(x=tss_distance, y=reads, color=strand)) +
      geom_line(size=1.2) +
-     geom_vline(xintercept=c(-5, 0:8, 13), color="gray50") +
-     geom_hline(yintercept=0, color="black") +
+     geom_vline(xintercept=0:5, color="gray50") +
      scale_colour_manual(name="Strand", values=c("+"="red", "-"="darkblue")) +
      geom_rect(show_guide=FALSE, inherit.aes=FALSE, data=motif.box, 
                aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax), 
                alpha=0.25, fill="gray80") +
-     theme_bw() +
-     scale_x_continuous(breaks=c(-15, -10, -5, 0, 8, 13, 18, 23), 
-                        labels=c( 15,  10,  5, 0, 0,  5, 10, 15), 
-                        limits=c(-15, 23)) +
-     theme(panel.grid.minor=element_blank(), 
-           panel.grid.major=element_blank()) +
-     labs(x="Distance to motif edge", y="Average ChIP-nexus reads", title="GGRWWTTCC") 
+     theme_manuscript() +
+     scale_x_continuous(breaks=c(-20, -15, -10, -5, 0, 5, 10, 15, 20, 25), 
+                        labels=c(-20, -15, -10, -5, 0, 0,  5, 10, 15, 20),
+                        limits=c(-30, 35)) +
+     labs(x="Distance to motif edge", y="Average ChIP-nexus reads", title="CABATG")
 g
 ```
 
 ``` {r save_zoomed_pdf, include=FALSE}
-pdf(figure_path("dorsal_GGRWWTTCC_profile.pdf"), width=9, height=6)
+pdf(figure_path("twi_CABATG_profile.pdf"), width=9, height=6)
 print(g)
 dev.off()
 ```
@@ -101,7 +100,7 @@ nothing <- lapply(names(sample.list), function(n) { draw_exo_heatmap(sample.list
 ```
 
 ``` {r create_heatmap_pdf, include=FALSE}
-pdf(figure_path("dorsal_heatmaps.pdf"), width=6, height=6)
+pdf(figure_path("twi_heatmaps.pdf"), width=6, height=6)
 nothing <- lapply(names(sample.list), function(n) { draw_exo_heatmap(sample.list[[n]], n, 75:125)})
 dev.off()
 ```

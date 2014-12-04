@@ -6,7 +6,7 @@ library(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
 library(BSgenome.Dmelanogaster.UCSC.dm3)
 library(rtracklayer)
 
-options(knitr.figure_dir = "figure_5_a_max_example_output")
+options(knitr.figure_dir = "figure_4_a_max_example_output")
 
 source("shared_code/knitr_common.r")
 source("shared_code/samples.r")
@@ -14,7 +14,7 @@ source("shared_code/granges_common.r")
 source("shared_code/gviz_common.r")
 ```
 
-# Figure 5A: Max example region
+# Figure 4A: Max example region
 
 ``` {r header_child, child="child_docs/header_child.Rmd"}
 ```
