@@ -71,22 +71,22 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <h1>Figure 4: Max asymmetric binding</h1>
 <p><strong>Project:</strong> ChIP-nexus methods paper</p>
 <p><strong>Author:</strong> <a href="mailto:jjj@stowers.org">Jeff Johnston</a></p>
-<p><strong>Generated:</strong> Thu Oct 23 2014, 09:00 PM</p>
+<p><strong>Generated:</strong> Thu Dec 04 2014, 03:29 PM</p>
 <div id="panels-b-and-c" class="section level2">
 <h2>Panels B and C</h2>
 <p>We will first orient the Max motifs “towards” the side with the greater Max ChIP-nexus signal. As the motif is palindromic, we can simply assign a strand to the motif to give it a direction. We will define positive-strand motifs as those where the Max signal is greatest to the right of the motif, and negative-strand motifs will be those where the Max signal is greatest to the left.</p>
-<p>We’ll start with the top 200 <strong><code>CACGTG</code></strong> motifs shown in Figure 4C. After assigning a direction to each motif, we can plot a ChIP-nexus metapeak to verify that we have properly oriented the motifs toward the direction of highest Max signal:</p>
-<p><img src="figure_5_b_c_d_e_f_output/top_motifs_metapeak-1.png" title="" alt="" width="672" /></p>
+<p>We’ll start with the top 200 <strong><code>CACGTG</code></strong> motifs shown in Figure 3C. After assigning a direction to each motif, we can plot a ChIP-nexus metapeak to verify that we have properly oriented the motifs toward the direction of highest Max signal:</p>
+<p><img src="figure_4_b_c_d_e_f_output/top_motifs_metapeak-1.png" title="" alt="" width="672" /></p>
 <p>We can plot the Myc ChIP-nexus data for these same motifs to verify that the shifted Max footprint is not the result of detecting one half of the Max-Myc heterodimer:</p>
-<p><img src="figure_5_b_c_d_e_f_output/top_motifs_myc_metapeak-1.png" title="" alt="" width="672" /></p>
+<p><img src="figure_4_b_c_d_e_f_output/top_motifs_myc_metapeak-1.png" title="" alt="" width="672" /></p>
 </div>
 <div id="panel-d-base-composition-adjacent-to-max-bound-motifs" class="section level2">
 <h2>Panel D: Base composition adjacent to Max-bound motifs</h2>
 <p>Now that the top motifs are oriented towards greater Max binding, we can look at the the base composition around these motifs:</p>
-<p><img src="figure_5_b_c_d_e_f_output/base_composition_plot-1.png" title="" alt="" width="672" /></p>
+<p><img src="figure_4_b_c_d_e_f_output/base_composition_plot-1.png" title="" alt="" width="672" /></p>
 <p>Statistical tests (single base):</p>
 <!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Thu Oct 23 21:00:52 2014 -->
+<!-- Thu Dec  4 15:29:32 2014 -->
 <table border="1">
 <tr>
 <th>
@@ -518,10 +518,10 @@ neg_log_pv
 </td>
 </tr>
 </table>
-<p><img src="figure_5_b_c_d_e_f_output/base_composition_stat_test_plot-1.png" title="" alt="" width="672" /></p>
+<p><img src="figure_4_b_c_d_e_f_output/base_composition_stat_test_plot-1.png" title="" alt="" width="672" /></p>
 <p>Statistical tests (sliding 5bp window):</p>
 <!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Thu Oct 23 21:00:52 2014 -->
+<!-- Thu Dec  4 15:29:32 2014 -->
 <table border="1">
 <tr>
 <th>
@@ -909,21 +909,21 @@ neg_log_pv
 </td>
 </tr>
 </table>
-<p><img src="figure_5_b_c_d_e_f_output/base_composition_stat_test_sliding_plot-1.png" title="" alt="" width="672" /></p>
+<p><img src="figure_4_b_c_d_e_f_output/base_composition_stat_test_sliding_plot-1.png" title="" alt="" width="672" /></p>
 </div>
 <div id="panel-e" class="section level2">
 <h2>Panel E</h2>
 <p>A previous study found that DNA shape can influence the binding specificity of bHLH transcription factors (Gordân, Shen, Dror, Zhou, Horton, Rohs, and Bulyk, 2013). It is possible that Max, like other bHLH transcription factors, is sensitive to DNA shape characteristics and the differences in base composition seen above are a reflection of this sensitivity.</p>
 <p>To investigate this possibility, we first need to obtain genome-wide DNA shape information. A recent paper (Zhou, Yang, Lu, Dror, Machado, Ghane, Felice, and Rohs, 2013) provides a web service called <a href="http://rohslab.cmb.usc.edu/DNAshape/">DNAShape</a> that calculates DNA shape parameters given an input sequence. Genome-wide data for <em>Drosophila melanogaster</em> was constructed by obtaining DNA minor groove width and propeller twist values for all possible 5-mers and then mapping those values to the genome sequence.</p>
 <p>Using this data, we can examine these two DNA shape parameters around the Max binding motifs:</p>
-<p><img src="figure_5_b_c_d_e_f_output/dna_shape_plot-1.png" title="" alt="" width="576" /><img src="figure_5_b_c_d_e_f_output/dna_shape_plot-2.png" title="" alt="" width="576" /></p>
+<p><img src="figure_4_b_c_d_e_f_output/dna_shape_plot-1.png" title="" alt="" width="576" /><img src="figure_4_b_c_d_e_f_output/dna_shape_plot-2.png" title="" alt="" width="576" /></p>
 <p>The maximum propeller twist value is found 3 bp downstream of the motif right edge. We can use a paired t-test to compare these values with the corresponding values 3 bp upstream of the motif’s left edge:</p>
 <p>This test yields a p-value of 3.478459110^{-22}.</p>
 </div>
 <div id="panel-f" class="section level2">
 <h2>Panel F</h2>
 <p>The sharp increase in the DNA “propeller twist” on the side of the motif with higher Max binding is quite pronounced. We can visualize this association with a heatmap by ordering the (directionless) motifs by the difference in propeller twist between the left and right sides:</p>
-<p><img src="figure_5_b_c_d_e_f_output/dna_shape_heatmap_plot-1.png" title="" alt="" width="480" /><img src="figure_5_b_c_d_e_f_output/dna_shape_heatmap_plot-2.png" title="" alt="" width="480" /><img src="figure_5_b_c_d_e_f_output/dna_shape_heatmap_plot-3.png" title="" alt="" width="480" /><img src="figure_5_b_c_d_e_f_output/dna_shape_heatmap_plot-4.png" title="" alt="" width="480" /></p>
+<p><img src="figure_4_b_c_d_e_f_output/dna_shape_heatmap_plot-1.png" title="" alt="" width="480" /><img src="figure_4_b_c_d_e_f_output/dna_shape_heatmap_plot-2.png" title="" alt="" width="480" /><img src="figure_4_b_c_d_e_f_output/dna_shape_heatmap_plot-3.png" title="" alt="" width="480" /><img src="figure_4_b_c_d_e_f_output/dna_shape_heatmap_plot-4.png" title="" alt="" width="480" /></p>
 <p>The ChIP-nexus heatmap shows that when the propeller twist difference is most extreme (at the top and bottom of the heatmap), Max appears to prefer the side with higher (less negative) propeller twist.</p>
 </div>
 <div id="references" class="section level2">
