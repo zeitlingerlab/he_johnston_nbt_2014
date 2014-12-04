@@ -15,7 +15,7 @@ sudo chown -R ubuntu:ubuntu /data
 
 ## Install R 3.1.1 and Bioconductor 2.15
 
-Create /etc/apt/sources.list.d/cran.list and add the line:
+Create `/etc/apt/sources.list.d/cran.list` and add the line:
 
 ```
 deb http://cran.rstudio.com/bin/linux/ubuntu trusty/
@@ -91,7 +91,7 @@ biocLite(bioc_packages)
 ## Download analysis code
 
 ```bash
-cd /home/ubuntu
+cd /data
 git clone https://github.com/zeitlingerlab/he_johnston_nbt_2014 analysis_code
 ```
 
@@ -114,6 +114,8 @@ mkdir /data/software/sra
 cd /data/software/sra
 wget 'http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/2.4.2-1/sratoolkit.2.4.2-ubuntu64.tar.gz'
 tar xf sratoolkit.2.4.2-ubuntu64.tar.gz
+
+# Accept defaults
 /data/software/sra/sratoolkit.2.4.2-ubuntu64/bin/vdb-config -i
 ```
 
