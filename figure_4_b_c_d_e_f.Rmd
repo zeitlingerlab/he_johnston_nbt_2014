@@ -34,7 +34,7 @@ We'll start with the top 200 **`CACGTG`** motifs shown in Figure 3C. After assig
 max_sample <- get_sample_cl("dmel_s2_max_chipnexus_01")
 myc_sample <- get_sample_cl("dmel_s2_myc_chipnexus_01")
 
-max.gr <- import("figure_4_c_max_output/dmel_s2_max_chipnexus_01_top_200_motifs.bed", asRangedData=FALSE)
+max.gr <- import("figure_3_c_max_output/dmel_s2_max_chipnexus_01_top_200_motifs.bed", asRangedData=FALSE)
 
 all.gr <- cache("all.gr.rds", function() {
   
